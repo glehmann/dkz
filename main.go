@@ -38,7 +38,7 @@ func (c *Context) Env() map[string]string {
 }
 
 var (
-	buildVersion string
+	buildVersion string = "0.7.0"
 	version      bool
 	poll         bool
 	wg           sync.WaitGroup

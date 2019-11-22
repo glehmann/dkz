@@ -35,42 +35,14 @@ dockerize.
 
 Download the latest version in your container:
 
-* [linux/amd64](https://github.com/glehmann/dkz/releases/download/v0.6.1/dkz-linux-amd64-v0.6.1.tar.gz)
-* [alpine/amd64](https://github.com/glehmann/dkz/releases/download/v0.6.1/dkz-alpine-linux-amd64-v0.6.1.tar.gz)
-* [darwin/amd64](https://github.com/glehmann/dkz/releases/download/v0.6.1/dkz-darwin-amd64-v0.6.1.tar.gz)
+* [linux/amd64](https://github.com/glehmann/dkz/releases/download/v0.7.0/dkz_linux_amd64)
 
-
-### Docker Base Image
-
-The `glehmann/dkz` image is a base image based on `alpine linux`.  `dkz` is installed in the `$PATH` and can be used directly.
-
-```
-FROM glehmann/dkz
-...
-ENTRYPOINT dkz ...
-```
 
 ### Ubuntu Images
 
 ``` Dockerfile
 RUN apt-get update && apt-get install -y wget
-
-ENV DKZ_VERSION v0.6.1
-RUN wget https://github.com/glehmann/dkz/releases/download/$DKZ_VERSION/dkz-linux-amd64-$DKZ_VERSION.tar.gz \
-    && tar -C /usr/local/bin -xzvf dkz-linux-amd64-$DKZ_VERSION.tar.gz \
-    && rm dkz-linux-amd64-$DKZ_VERSION.tar.gz
-```
-
-
-### For Alpine Images:
-
-``` Dockerfile
-RUN apk add --no-cache openssl
-
-ENV DKZ_VERSION v0.6.1
-RUN wget https://github.com/glehmann/dkz/releases/download/$DKZ_VERSION/dkz-alpine-linux-amd64-$DKZ_VERSION.tar.gz \
-    && tar -C /usr/local/bin -xzvf dkz-alpine-linux-amd64-$DKZ_VERSION.tar.gz \
-    && rm dkz-alpine-linux-amd64-$DKZ_VERSION.tar.gz
+RUN wget https://github.com/glehmann/dkz/releases/download/v0.7.0/dkz_linux_amd64 -O /usr/bin/dockerize
 ```
 
 ## Usage
