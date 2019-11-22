@@ -9,8 +9,7 @@ before_install:
 
 script:
   - go get
-  - go get golang.org/x/sys/windows || true
-  - gox
+  - gox -os linux
 
 deploy:
   provider: releases
