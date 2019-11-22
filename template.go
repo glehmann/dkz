@@ -116,6 +116,18 @@ func loop(args ...int) (<-chan int, error) {
 	return c, nil
 }
 
+func read(path string) (string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		return "", err
+	}
+	return string(content), nil
+}
+
 func generateFile(templatePath, destPath string) bool {
 	funcMap := template.FuncMap{
 		"contains":  contains,
@@ -131,6 +143,7 @@ func generateFile(templatePath, destPath string) bool {
 		"upper":     strings.ToUpper,
 		"jsonQuery": jsonQuery,
 		"loop":      loop,
+		"read":      read,
 	}
 	for k, v := range sprig.FuncMap() {
 		if _, ok := funcMap[k]; !ok {
