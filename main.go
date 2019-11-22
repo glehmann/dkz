@@ -180,7 +180,7 @@ func waitForSocket(scheme, addr string, timeout time.Duration) {
 }
 
 func usage() {
-	println(`Usage: dockerize [options] [command]
+	println(`Usage: dkz [options] [command]
 
 Utility to simplify running applications in docker containers
 
@@ -197,13 +197,13 @@ Arguments:
 	println(`   Generate /etc/nginx/nginx.conf using nginx.tmpl as a template, tail /var/log/nginx/access.log
    and /var/log/nginx/error.log, waiting for a website to become available on port 8000 and start nginx.`)
 	println(`
-   dockerize -template nginx.tmpl:/etc/nginx/nginx.conf \
+   dkz -template nginx.tmpl:/etc/nginx/nginx.conf \
              -stdout /var/log/nginx/access.log \
              -stderr /var/log/nginx/error.log \
              -wait tcp://web:8000 nginx
 	`)
 
-	println(`For more information, see https://github.com/jwilder/dockerize`)
+	println(`For more information, see https://github.com/glehmann/dkz`)
 }
 
 func main() {

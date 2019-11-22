@@ -1,46 +1,53 @@
-dockerize ![version v0.6.1](https://img.shields.io/badge/version-v0.6.1-brightgreen.svg) ![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)
+dkz ![version v0.6.1](https://img.shields.io/badge/version-v0.6.1-brightgreen.svg) ![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)
 =============
 
 Utility to simplify running applications in docker containers.
 
-dockerize is a utility to simplify running applications in docker containers.  It allows you to:
+dkz is a utility to simplify running applications in docker containers.  It allows you to:
 * generate application configuration files at container startup time from templates and container environment variables
 * Tail multiple log files to stdout and/or stderr
 * Wait for other services to be available using TCP, HTTP(S), unix before starting the main process.
 
-The typical use case for dockerize is when you have an application that has one or more configuration files and you would like to control some of the values using environment variables.
+The typical use case for dkz is when you have an application that has one or more configuration files and you would like to control some of the values using environment variables.
 
 For example, a Python application using Sqlalchemy might not be able to use environment variables directly.
 It may require that the database URL be read from a python settings file with a variable named
-`SQLALCHEMY_DATABASE_URI`.  dockerize allows you to set an environment variable such as
+`SQLALCHEMY_DATABASE_URI`.  dkz allows you to set an environment variable such as
 `DATABASE_URL` and update the python file when the container starts.
 In addition, it can also delay the starting of the python application until the database container is running and listening on the TCP port.
 
 Another use case is when the application logs to specific files on the filesystem and not stdout
 or stderr. This makes it difficult to troubleshoot the container using the `docker logs` command.
 For example, nginx will log to `/var/log/nginx/access.log` and
-`/var/log/nginx/error.log` by default. While you can sometimes work around this, it's tedious to find a solution for every application. dockerize allows you to specify which logs files should be tailed and where they should be sent.
+`/var/log/nginx/error.log` by default. While you can sometimes work around this, it's tedious to find a solution for every application. dkz allows you to specify which logs files should be tailed and where they should be sent.
 
 See [A Simple Way To Dockerize Applications](http://jasonwilder.com/blog/2014/10/13/a-simple-way-to-dockerize-applications/)
 
+Note: this is a fork of https://github.com/jwilder/dockerize in order to add some features that I need, and
+provide the associated, easy to download binaries. Renaming is done out of respect for the original repository
+and work of its author, as I don't wan't to create new binaries and tags that may appear in the original
+project.
+
+This fork will stay alive as long as I need it, but will disappear if/when most of these features land in the official
+dockerize.
 
 ## Installation
 
 Download the latest version in your container:
 
-* [linux/amd64](https://github.com/jwilder/dockerize/releases/download/v0.6.1/dockerize-linux-amd64-v0.6.1.tar.gz)
-* [alpine/amd64](https://github.com/jwilder/dockerize/releases/download/v0.6.1/dockerize-alpine-linux-amd64-v0.6.1.tar.gz)
-* [darwin/amd64](https://github.com/jwilder/dockerize/releases/download/v0.6.1/dockerize-darwin-amd64-v0.6.1.tar.gz)
+* [linux/amd64](https://github.com/glehmann/dkz/releases/download/v0.6.1/dkz-linux-amd64-v0.6.1.tar.gz)
+* [alpine/amd64](https://github.com/glehmann/dkz/releases/download/v0.6.1/dkz-alpine-linux-amd64-v0.6.1.tar.gz)
+* [darwin/amd64](https://github.com/glehmann/dkz/releases/download/v0.6.1/dkz-darwin-amd64-v0.6.1.tar.gz)
 
 
 ### Docker Base Image
 
-The `jwilder/dockerize` image is a base image based on `alpine linux`.  `dockerize` is installed in the `$PATH` and can be used directly.
+The `glehmann/dkz` image is a base image based on `alpine linux`.  `dkz` is installed in the `$PATH` and can be used directly.
 
 ```
-FROM jwilder/dockerize
+FROM glehmann/dkz
 ...
-ENTRYPOINT dockerize ...
+ENTRYPOINT dkz ...
 ```
 
 ### Ubuntu Images
@@ -48,10 +55,10 @@ ENTRYPOINT dockerize ...
 ``` Dockerfile
 RUN apt-get update && apt-get install -y wget
 
-ENV DOCKERIZE_VERSION v0.6.1
-RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
-    && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
-    && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+ENV DKZ_VERSION v0.6.1
+RUN wget https://github.com/glehmann/dkz/releases/download/$DKZ_VERSION/dkz-linux-amd64-$DKZ_VERSION.tar.gz \
+    && tar -C /usr/local/bin -xzvf dkz-linux-amd64-$DKZ_VERSION.tar.gz \
+    && rm dkz-linux-amd64-$DKZ_VERSION.tar.gz
 ```
 
 
@@ -60,22 +67,22 @@ RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSI
 ``` Dockerfile
 RUN apk add --no-cache openssl
 
-ENV DOCKERIZE_VERSION v0.6.1
-RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
-    && tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
-    && rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+ENV DKZ_VERSION v0.6.1
+RUN wget https://github.com/glehmann/dkz/releases/download/$DKZ_VERSION/dkz-alpine-linux-amd64-$DKZ_VERSION.tar.gz \
+    && tar -C /usr/local/bin -xzvf dkz-alpine-linux-amd64-$DKZ_VERSION.tar.gz \
+    && rm dkz-alpine-linux-amd64-$DKZ_VERSION.tar.gz
 ```
 
 ## Usage
 
-dockerize works by wrapping the call to your application using the `ENTRYPOINT` or `CMD` directives.
+dkz works by wrapping the call to your application using the `ENTRYPOINT` or `CMD` directives.
 
 This would generate `/etc/nginx/nginx.conf` from the template located at `/etc/nginx/nginx.tmpl` and
 send `/var/log/nginx/access.log` to `STDOUT` and `/var/log/nginx/error.log` to `STDERR` after running
 `nginx`, only after waiting for the `web` host to respond on `tcp 8000`:
 
 ``` Dockerfile
-CMD dockerize -template /etc/nginx/nginx.tmpl:/etc/nginx/nginx.conf -stdout /var/log/nginx/access.log -stderr /var/log/nginx/error.log -wait tcp://web:8000 nginx
+CMD dkz -template /etc/nginx/nginx.tmpl:/etc/nginx/nginx.conf -stdout /var/log/nginx/access.log -stderr /var/log/nginx/error.log -wait tcp://web:8000 nginx
 ```
 
 ### Command-line Options
@@ -83,14 +90,14 @@ CMD dockerize -template /etc/nginx/nginx.tmpl:/etc/nginx/nginx.conf -stdout /var
 You can specify multiple templates by passing using `-template` multiple times:
 
 ```
-$ dockerize -template template1.tmpl:file1.cfg -template template2.tmpl:file3
+$ dkz -template template1.tmpl:file1.cfg -template template2.tmpl:file3
 
 ```
 
 Templates can be generated to `STDOUT` by not specifying a dest:
 
 ```
-$ dockerize -template template1.tmpl
+$ dkz -template template1.tmpl
 
 ```
 
@@ -98,40 +105,40 @@ Template may also be a directory. In this case all files within this directory a
 If the destination directory is omitted, the output is sent to `STDOUT`. The files in the source directory are processed in sorted order (as returned by `ioutil.ReadDir`).
 
 ```
-$ dockerize -template src_dir:dest_dir
+$ dkz -template src_dir:dest_dir
 
 ```
 
-If the destination file already exists, dockerize will overwrite it. The -no-overwrite flag overrides this behaviour.
+If the destination file already exists, dkz will overwrite it. The -no-overwrite flag overrides this behaviour.
 
 ```
-$ dockerize -no-overwrite -template template1.tmpl:file
+$ dkz -no-overwrite -template template1.tmpl:file
 ```
 
 You can tail multiple files to `STDOUT` and `STDERR` by passing the options multiple times.
 
 ```
-$ dockerize -stdout info.log -stdout perf.log
+$ dkz -stdout info.log -stdout perf.log
 
 ```
 
 If `inotify` does not work in you container, you use `-poll` to poll for file changes instead.
 
 ```
-$ dockerize -stdout info.log -stdout perf.log -poll
+$ dkz -stdout info.log -stdout perf.log -poll
 
 ```
 
 If your file uses `{{` and `}}` as part of it's syntax, you can change the template escape characters using the `-delims`.
 
 ```
-$ dockerize -delims "<%:%>"
+$ dkz -delims "<%:%>"
 ```
 
 Http headers can be specified for http/https protocols.
 
 ```
-$ dockerize -wait http://web:80 -wait-http-header "Authorization:Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
+$ dkz -wait http://web:80 -wait-http-header "Authorization:Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
 ```
 
 ## Waiting for other dependencies
@@ -141,7 +148,7 @@ It is common when using tools like [Docker Compose](https://docs.docker.com/comp
 Dockerize gives you the ability to wait for services on a specified protocol (`file`, `tcp`, `tcp4`, `tcp6`, `http`, `https` and `unix`) before starting your application:
 
 ```
-$ dockerize -wait tcp://db:5432 -wait http://web:80 -wait file:///tmp/generated-file
+$ dkz -wait tcp://db:5432 -wait http://web:80 -wait file:///tmp/generated-file
 ```
 
 ### Timeout
@@ -149,7 +156,7 @@ $ dockerize -wait tcp://db:5432 -wait http://web:80 -wait file:///tmp/generated-
 You can optionally specify how long to wait for the services to become available by using the `-timeout #` argument (Default: 10 seconds).  If the timeout is reached and the service is still not available, the process exits with status code 1.
 
 ```
-$ dockerize -wait tcp://db:5432 -wait http://web:80 -timeout 10s
+$ dkz -wait tcp://db:5432 -wait http://web:80 -timeout 10s
 ```
 
 See [this issue](https://github.com/docker/compose/issues/374#issuecomment-126312313) for a deeper discussion, and why support isn't and won't be available in the Docker ecosystem itself.

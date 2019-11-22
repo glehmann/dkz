@@ -7,8 +7,8 @@ RUN echo "deb http://ppa.launchpad.net/nginx/stable/ubuntu trusty main" > /etc/a
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C300EE8C \
     && apt-get update && apt-get install -y wget nginx
 
-RUN wget https://github.com/jwilder/dockerize/releases/download/v0.0.4/dockerize-linux-amd64-v0.0.4.tar.gz \
-    && tar -C /usr/local/bin -xvzf dockerize-linux-amd64-v0.0.4.tar.gz
+RUN wget https://github.com/glehmann/dkz/releases/download/v0.0.4/dkz-linux-amd64-v0.0.4.tar.gz \
+    && tar -C /usr/local/bin -xvzf dkz-linux-amd64-v0.0.4.tar.gz
 
 RUN echo "daemon off;" >> /etc/nginx/nginx.conf
 
@@ -16,4 +16,4 @@ ADD default.tmpl /etc/nginx/sites-available/default.tmpl
 
 EXPOSE 80
 
-CMD ["dockerize", "-template", "/etc/nginx/sites-available/default.tmpl:/etc/nginx/sites-available/default", "-stdout", "/var/log/nginx/access.log", "-stderr", "/var/log/nginx/error.log", "nginx"]
+CMD ["dkz", "-template", "/etc/nginx/sites-available/default.tmpl:/etc/nginx/sites-available/default", "-stdout", "/var/log/nginx/access.log", "-stderr", "/var/log/nginx/error.log", "nginx"]
